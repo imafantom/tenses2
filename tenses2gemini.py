@@ -7,7 +7,12 @@ motivational_messages = [
     "You're doing amazing, [User]! Stay focused!",
     "Well done, [User]! Keep going!",
     "Fantastic effort, [User]! You're a star!",
-    "Keep shining, [User]! You're learning fast!"
+    "Keep shining, [User]! You're learning fast!",
+    "You're unstoppable, [User]! Keep learning!",
+    "Excellent work, [User]! Proud of you!",
+    "Learning looks good on you, [User]!",
+    "Way to go, [User]! Keep it rolling!",
+    "You're an English master in the making, [User]!"
 ]
 
 # Shuffle messages
@@ -27,9 +32,11 @@ tenses = {
         "Usage": "E.g., I visited Paris last year. He went to the market.",
         "Examples": ["She walked to school.", "They played football."]
     },
+    # Add more tenses here as needed
 }
 
 def initialize_session_state():
+    """Initialize session state variables."""
     if "user_name" not in st.session_state:
         st.session_state["user_name"] = ""
     if "tense" not in st.session_state:
@@ -86,10 +93,20 @@ def main():
             st.markdown(f"### Question {st.session_state['question_number']}")
             question = f"Write a sentence in {tense_selection} tense."
             user_answer = st.text_input(question, key=f"q{st.session_state['question_number']}")
-            if st.button("Submit"):
+            if st.button("Submit", key=f"submit{st.session_state['question_number']}"):
                 feedback = motivational_messages[st.session_state["message_index"] % len(motivational_messages)]
                 st.write(feedback.replace("[User]", st.session_state["user_name"]))
                 st.write(f"Your answer: {user_answer}")
                 st.session_state["answers"].append(user_answer)
-                st.session_state["message_index"] += 
+                st.session_state["message_index"] += 1
+                st.session_state["question_number"] += 1
+                st.experimental_rerun()
+        else:
+            st.success("Congratulations! You've completed this practice.")
+            st.image("https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif", use_column_width=True)
+            st.balloons()
+            st.write("Select another tense from the sidebar to continue practicing!")
+
+if __name__ == "__main__":
+    main()
 
