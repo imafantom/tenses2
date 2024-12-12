@@ -12,7 +12,6 @@ motivational_messages = [
 
 # Shuffle messages
 random.shuffle(motivational_messages)
-message_index = 0
 
 # Define tense explanations
 tenses = {
@@ -28,13 +27,9 @@ tenses = {
         "Usage": "E.g., I visited Paris last year. He went to the market.",
         "Examples": ["She walked to school.", "They played football."]
     },
-    # Add more tenses here...
 }
 
-def main():
-    st.set_page_config(page_title="English Grammar Practice", page_icon="📚")
-
-    # Initialize session state
+def initialize_session_state():
     if "user_name" not in st.session_state:
         st.session_state["user_name"] = ""
     if "tense" not in st.session_state:
@@ -46,17 +41,23 @@ def main():
     if "message_index" not in st.session_state:
         st.session_state["message_index"] = 0
 
+def main():
+    st.set_page_config(page_title="English Grammar Practice", page_icon="📚")
+
+    initialize_session_state()
+
     # Home screen
-    if st.session_state["user_name"] == "":
+    if not st.session_state["user_name"]:
         st.title("Welcome to English Grammar Practice!")
         st.markdown("## Enter your name below to get started:")
-        st.session_state["user_name"] = st.text_input("What's your name?", "")
-        if st.session_state["user_name"]:
-            st.balloons()
-            st.experimental_rerun()
+        user_name = st.text_input("What's your name?", "")
+        if st.button("Continue"):
+            if user_name:
+                st.session_state["user_name"] = user_name
+                st.balloons()
+                st.experimental_rerun()
 
-    # Motivation messages
-    if st.session_state["tense"] == "":
+    elif not st.session_state["tense"]:
         st.title(f"Hello, {st.session_state['user_name']}!")
         st.markdown("### Why are you here?")
         reason = st.radio(
@@ -67,17 +68,14 @@ def main():
             st.session_state["tense"] = "Select a tense"
             st.experimental_rerun()
 
-    # Practice interface
-    st.sidebar.title("Choose a Tense")
-    tense_selection = st.sidebar.radio("Tenses", list(tenses.keys()))
-    if tense_selection:
+    else:
+        # Practice interface
+        st.sidebar.title("Choose a Tense")
+        tense_selection = st.sidebar.radio("Tenses", list(tenses.keys()))
         st.session_state["tense"] = tense_selection
-        st.experimental_rerun()
 
-    if st.session_state["tense"] != "":
-        selected_tense = st.session_state["tense"]
-        st.title(f"{selected_tense} - Grammar Practice")
-        tense_data = tenses[selected_tense]
+        st.title(f"{tense_selection} - Grammar Practice")
+        tense_data = tenses[tense_selection]
         st.markdown(f"### Explanation: {tense_data['Explanation']}")
         st.markdown(f"**Form:** {tense_data['Form']}")
         st.markdown(f"**Usage:** {tense_data['Usage']}")
@@ -86,21 +84,12 @@ def main():
 
         if st.session_state["question_number"] <= 10:
             st.markdown(f"### Question {st.session_state['question_number']}")
-            question = f"Write a sentence in {selected_tense} tense."
-            user_answer = st.text_input(question, "")
+            question = f"Write a sentence in {tense_selection} tense."
+            user_answer = st.text_input(question, key=f"q{st.session_state['question_number']}")
             if st.button("Submit"):
                 feedback = motivational_messages[st.session_state["message_index"] % len(motivational_messages)]
                 st.write(feedback.replace("[User]", st.session_state["user_name"]))
                 st.write(f"Your answer: {user_answer}")
                 st.session_state["answers"].append(user_answer)
-                st.session_state["message_index"] += 1
-                st.session_state["question_number"] += 1
-                st.experimental_rerun()
-        else:
-            st.success("Congratulations! You've completed this practice.")
-            st.image("https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif", use_column_width=True)
-            st.balloons()
-            st.write("Select another tense from the sidebar to continue practicing!")
+                st.session_state["message_index"] += 
 
-if __name__ == "__main__":
-    main()
