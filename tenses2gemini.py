@@ -1,144 +1,106 @@
 import streamlit as st
 import random
-import time
 
-# --- Data for the app ---
-tenses = {
-    "Present Simple": {
-        "formation": """
-            **Positive:** Subject + base form of verb (+ -s/-es for third person singular)
-            **Negative:** Subject + do/does + not + base form of verb
-            **Question:** Do/Does + subject + base form of verb?
-            **Short Answers:** Yes, subject + do/does. / No, subject + do/does + not.
-        """,
-        "usage": "Used for habits, routines, facts, and general truths.",
-        "examples": [
-            "I eat breakfast every morning.",
-            "She plays the piano beautifully.",
-            "They don't live in the city.",
-            "Does he speak English?"
-        ],
-        "scenarios": [
-            {"title": "Habits", "question": "What do you do every morning?"},
-            {"title": "Routines", "question": "What do you do before you go to bed?"},
-            # ... add 8 more scenarios
-        ]
-    },
-    "Past Simple": {
-        # ... add formation, usage, examples, and scenarios for Past Simple
-    },
-    # ... add more tenses
-}
-
+# Motivational messages
 motivational_messages = [
-    "Keep up the great work, {name}!",
-    "You're doing fantastic, {name}!",
-    "Amazing effort, {name}!",
-    # ... add more motivational messages (at least 20)
+    "Great job, [User]! Keep it up!",
+    "You're doing amazing, [User]! Stay focused!",
+    "Well done, [User]! Keep going!",
+    "Fantastic effort, [User]! You're a star!",
+    "Keep shining, [User]! You're learning fast!"
 ]
 
-# --- Helper Functions ---
-def show_gif(gif_path, duration=10):
-    """Displays a GIF with a fade-out effect."""
-    with open(gif_path, "rb") as gif_file:
-        gif = gif_file.read()
-    st.markdown(
-        f"""
-        <style>
-        .gif-container {{
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            max-width: 400px; /* Adjust as needed */
-            margin: 0 auto;
-        }}
-        .gif {{
-            animation: fadeOut {duration}s linear forwards;
-        }}
-        @keyframes fadeOut {{
-            0% {{ opacity: 1; }}
-            100% {{ opacity: 0; }}
-        }}
-        </style>
-        <div class="gif-container">
-            <img src="data:image/gif;base64,{gif.encode('base64').decode()}" class="gif">
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    time.sleep(duration)  # Wait for the animation to complete
+# Shuffle messages
+random.shuffle(motivational_messages)
+message_index = 0
 
-# --- App Starts Here ---
+# Define tense explanations
+tenses = {
+    "Present Simple": {
+        "Explanation": "Used for habits and general truths.",
+        "Form": "Subject + base verb (add 's' for he/she/it)",
+        "Usage": "E.g., I play tennis every week. She studies hard.",
+        "Examples": ["The sun rises in the east.", "I enjoy reading books."]
+    },
+    "Past Simple": {
+        "Explanation": "Used for actions completed in the past.",
+        "Form": "Subject + verb-ed (regular) / irregular verb",
+        "Usage": "E.g., I visited Paris last year. He went to the market.",
+        "Examples": ["She walked to school.", "They played football."]
+    },
+    # Add more tenses here...
+}
 
-# --- CSS for large, attractive font ---
-st.markdown(
-    """
-    <style>
-    .big-font {
-        font-size: 50px !important; /* Adjust size as needed */
-        font-weight: bold;
-        font-family: 'Arial Black', sans-serif;
-        color: #3366ff; /* Example color */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+def main():
+    st.set_page_config(page_title="English Grammar Practice", page_icon="📚")
 
-# --- Initial Screen ---
-st.markdown('<p class="big-font">Welcome to the English Grammar Guru!</p>', unsafe_allow_html=True)
-show_gif("typing_cat.gif")  # Replace with your GIF path
-user_name = st.text_input("Please enter your name:")
+    # Initialize session state
+    if "user_name" not in st.session_state:
+        st.session_state["user_name"] = ""
+    if "tense" not in st.session_state:
+        st.session_state["tense"] = ""
+    if "question_number" not in st.session_state:
+        st.session_state["question_number"] = 1
+    if "answers" not in st.session_state:
+        st.session_state["answers"] = []
+    if "message_index" not in st.session_state:
+        st.session_state["message_index"] = 0
 
-if st.button("Continue"):
-    if user_name:
-        st.balloons()
-        # --- "Why Here" Screen ---
-        st.write(f"<p class='big-font'>{user_name} – Why are you here?!</p>", unsafe_allow_html=True)
-        why_here = st.radio(
-            "Choose one:",
-            [
-                "Because I love learning English with all my heart",
-                "My teacher made me use this app"
-            ]
+    # Home screen
+    if st.session_state["user_name"] == "":
+        st.title("Welcome to English Grammar Practice!")
+        st.markdown("## Enter your name below to get started:")
+        st.session_state["user_name"] = st.text_input("What's your name?", "")
+        if st.session_state["user_name"]:
+            st.balloons()
+            st.experimental_rerun()
+
+    # Motivation messages
+    if st.session_state["tense"] == "":
+        st.title(f"Hello, {st.session_state['user_name']}!")
+        st.markdown("### Why are you here?")
+        reason = st.radio(
+            "Choose your reason:",
+            ["Because I love learning English with all my heart", "My teacher made me use this app"]
         )
         if st.button("Continue"):
-            # --- Main Practice Interface ---
-            st.sidebar.title("Select a Tense")
-            selected_tense = st.sidebar.selectbox(
-                "Tenses", list(tenses.keys())
-            )
+            st.session_state["tense"] = "Select a tense"
+            st.experimental_rerun()
 
-            if selected_tense:
-                st.header(selected_tense)
-                st.write(tenses[selected_tense]["formation"])
-                st.write(tenses[selected_tense]["usage"])
+    # Practice interface
+    st.sidebar.title("Choose a Tense")
+    tense_selection = st.sidebar.radio("Tenses", list(tenses.keys()))
+    if tense_selection:
+        st.session_state["tense"] = tense_selection
+        st.experimental_rerun()
 
-                # --- More Examples Expander ---
-                with st.expander("More Examples"):
-                    for example in tenses[selected_tense]["examples"]:
-                        st.write(example)
+    if st.session_state["tense"] != "":
+        selected_tense = st.session_state["tense"]
+        st.title(f"{selected_tense} - Grammar Practice")
+        tense_data = tenses[selected_tense]
+        st.markdown(f"### Explanation: {tense_data['Explanation']}")
+        st.markdown(f"**Form:** {tense_data['Form']}")
+        st.markdown(f"**Usage:** {tense_data['Usage']}")
+        with st.expander("More Examples"):
+            st.write("\n".join(tense_data["Examples"]))
 
-                # --- Practice Questions ---
-                random.shuffle(motivational_messages)  # Shuffle messages at the start
-                message_counter = 0
-                answered_count = 0
+        if st.session_state["question_number"] <= 10:
+            st.markdown(f"### Question {st.session_state['question_number']}")
+            question = f"Write a sentence in {selected_tense} tense."
+            user_answer = st.text_input(question, "")
+            if st.button("Submit"):
+                feedback = motivational_messages[st.session_state["message_index"] % len(motivational_messages)]
+                st.write(feedback.replace("[User]", st.session_state["user_name"]))
+                st.write(f"Your answer: {user_answer}")
+                st.session_state["answers"].append(user_answer)
+                st.session_state["message_index"] += 1
+                st.session_state["question_number"] += 1
+                st.experimental_rerun()
+        else:
+            st.success("Congratulations! You've completed this practice.")
+            st.image("https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif", use_column_width=True)
+            st.balloons()
+            st.write("Select another tense from the sidebar to continue practicing!")
 
-                for scenario in tenses[selected_tense]["scenarios"]:
-                    st.subheader(scenario["title"])
-                    user_answer = st.text_input(scenario["question"])
-                    if st.button("Submit"):
-                        st.write(motivational_messages[message_counter % len(motivational_messages)].format(name=user_name))
-                        message_counter += 1
-                        st.write("Your answer:", user_answer)
-                        answered_count += 1
-                        st.write(f"You have answered {answered_count} out of 10 questions.")
-
-                # --- Congratulatory Message and GIF ---
-                if answered_count == 10:
-                    st.balloons()
-                    st.success("Congratulations! You have completed all the questions for this tense!")
-                    show_gif("dancing_cat.gif")  # Replace with your GIF path
-                    st.write("Select another tense from the sidebar to continue practicing.")
-    else:
-        st.error("Please enter your name to continue.")
+if __name__ == "__main__":
+    main()
