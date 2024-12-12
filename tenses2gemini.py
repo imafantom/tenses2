@@ -2,138 +2,143 @@ import streamlit as st
 import random
 import time
 
-st.set_page_config(page_title="English Grammar Practice", page_icon="📚")
+# --- Data for the app ---
+tenses = {
+    "Present Simple": {
+        "formation": """
+            **Positive:** Subject + base form of verb (+ -s/-es for third person singular)
+            **Negative:** Subject + do/does + not + base form of verb
+            **Question:** Do/Does + subject + base form of verb?
+            **Short Answers:** Yes, subject + do/does. / No, subject + do/does + not.
+        """,
+        "usage": "Used for habits, routines, facts, and general truths.",
+        "examples": [
+            "I eat breakfast every morning.",
+            "She plays the piano beautifully.",
+            "They don't live in the city.",
+            "Does he speak English?"
+        ],
+        "scenarios": [
+            {"title": "Habits", "question": "What do you do every morning?"},
+            {"title": "Routines", "question": "What do you do before you go to bed?"},
+            # ... add 8 more scenarios
+        ]
+    },
+    "Past Simple": {
+        # ... add formation, usage, examples, and scenarios for Past Simple
+    },
+    # ... add more tenses
+}
 
-# Custom CSS for large font
+motivational_messages = [
+    "Keep up the great work, {name}!",
+    "You're doing fantastic, {name}!",
+    "Amazing effort, {name}!",
+    # ... add more motivational messages (at least 20)
+]
+
+# --- Helper Functions ---
+def show_gif(gif_path, duration=10):
+    """Displays a GIF with a fade-out effect."""
+    with open(gif_path, "rb") as gif_file:
+        gif = gif_file.read()
+    st.markdown(
+        f"""
+        <style>
+        .gif-container {{
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px; /* Adjust as needed */
+            margin: 0 auto;
+        }}
+        .gif {{
+            animation: fadeOut {duration}s linear forwards;
+        }}
+        @keyframes fadeOut {{
+            0% {{ opacity: 1; }}
+            100% {{ opacity: 0; }}
+        }}
+        </style>
+        <div class="gif-container">
+            <img src="data:image/gif;base64,{gif.encode('base64').decode()}" class="gif">
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    time.sleep(duration)  # Wait for the animation to complete
+
+# --- App Starts Here ---
+
+# --- CSS for large, attractive font ---
 st.markdown(
     """
     <style>
     .big-font {
-        font-size:48px !important;
+        font-size: 50px !important; /* Adjust size as needed */
         font-weight: bold;
-        color: #3498db;
-        text-shadow: 2px 2px 4px #000000;
+        font-family: 'Arial Black', sans-serif;
+        color: #3366ff; /* Example color */
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# Motivational messages
-motivational_messages = [
-    "You're doing great, {}!", "Keep up the amazing work, {}!", "You're a grammar superstar, {}!",
-    "Every step counts, {}!", "You're making progress, {}!", "Don't give up, {}!",
-    "You're a language master in the making, {}!", "You've got this, {}!",
-    "Learning is a journey, not a race, {}!", "You're inspiring, {}!",
-    "Your effort is paying off, {}!", "You're a true learner, {}!",
-    "You're shining bright, {}!", "You're on the right track, {}!",
-    "You're a grammar whiz, {}!", "You're doing fantastic, {}!",
-    "You're a language pro, {}!", "You're a star, {}!", "You're rocking it, {}!",
-    "You're simply amazing, {}!"
-]
+# --- Initial Screen ---
+st.markdown('<p class="big-font">Welcome to the English Grammar Guru!</p>', unsafe_allow_html=True)
+show_gif("typing_cat.gif")  # Replace with your GIF path
+user_name = st.text_input("Please enter your name:")
 
-# Tenses data (simplified example)
-tenses = {
-    "Present Simple": {
-        "explanation": "Used for habits, facts, and general truths.",
-        "usage": "Expressing daily routines, stating facts.",
-        "examples": ["I eat breakfast every morning.", "The sun rises in the east."],
-        "questions": [
-            {"scenario": "Habits", "question": "What do you usually do on weekends?"},
-            {"scenario": "Facts", "question": "Where do you live?"},
-            {"scenario": "Daily Routines", "question": "What time do you wake up?"},
-            {"scenario": "Likes/Dislikes", "question": "Do you like pizza?"},
-            {"scenario": "General Truths", "question": "Is water wet?"},
-            {"scenario": "Schedules", "question": "When does the train leave?"},
-            {"scenario": "Repeated Actions", "question": "How often do you go to the gym?"},
-            {"scenario": "States", "question": "Do you understand this?"},
-            {"scenario": "Instructions", "question": "How do you make tea?"},
-            {"scenario": "Future Timetable", "question": "When does the movie start?"}
-        ],
-    },
-    "Past Simple": {
-        "explanation": "Used for completed actions in the past.",
-        "usage": "Describing finished events.",
-        "examples": ["I went to the store yesterday.", "She studied hard for the exam."],
-        "questions": [
-            {"scenario": "Completed Actions", "question": "What did you do last weekend?"},
-            {"scenario": "Specific Time", "question": "Where did you go last night?"},
-            {"scenario": "Series of Actions", "question": "What did you do after you woke up?"},
-            {"scenario": "Habits in the Past", "question": "What did you usually do as a child?"},
-            {"scenario": "Duration in the Past", "question": "How long did you live there?"},
-            {"scenario": "Past Facts", "question": "Where were you born?"},
-            {"scenario": "Past States", "question": "Were you happy yesterday?"},
-            {"scenario": "Past Events", "question": "What happened at the party?"},
-            {"scenario": "Past Experiences", "question": "Did you ever travel abroad?"},
-            {"scenario": "Short Actions", "question": "What did you eat for breakfast?"}
-        ],
-    },
-}
-
-if "user_name" not in st.session_state:
-    st.session_state.user_name = None
-if "motivational_messages" not in st.session_state:
-    random.shuffle(motivational_messages)
-    st.session_state.motivational_messages = motivational_messages
-if "current_message_index" not in st.session_state:
-    st.session_state.current_message_index = 0
-if "answered_questions" not in st.session_state:
-    st.session_state.answered_questions = {}
-
-if st.session_state.user_name is None:
-    st.markdown("<p class='big-font'>Welcome to Grammar Practice!</p>", unsafe_allow_html=True)
-    try:
-        st.image("typing_cat.gif", use_container_width=True)  # Corrected line
-        time.sleep(10)
-    except FileNotFoundError:
-        st.error("typing_cat.gif not found. Please place it in the same directory as your script.")
-    st.session_state.user_name = st.text_input("Please enter your name:")
-    if st.session_state.user_name:
+if st.button("Continue"):
+    if user_name:
         st.balloons()
-        st.experimental_rerun()
-else:
-    if "why_here" not in st.session_state:
-        st.write(f"<p class='big-font'>{st.session_state.user_name} – Why are you here?!</p>", unsafe_allow_html=True)
-        why_here = st.radio("", ("Because I love learning English with all my heart", "My teacher made me use this app"))
+        # --- "Why Here" Screen ---
+        st.write(f"<p class='big-font'>{user_name} – Why are you here?!</p>", unsafe_allow_html=True)
+        why_here = st.radio(
+            "Choose one:",
+            [
+                "Because I love learning English with all my heart",
+                "My teacher made me use this app"
+            ]
+        )
         if st.button("Continue"):
-            st.session_state.why_here = True
-            st.experimental_rerun()
+            # --- Main Practice Interface ---
+            st.sidebar.title("Select a Tense")
+            selected_tense = st.sidebar.selectbox(
+                "Tenses", list(tenses.keys())
+            )
+
+            if selected_tense:
+                st.header(selected_tense)
+                st.write(tenses[selected_tense]["formation"])
+                st.write(tenses[selected_tense]["usage"])
+
+                # --- More Examples Expander ---
+                with st.expander("More Examples"):
+                    for example in tenses[selected_tense]["examples"]:
+                        st.write(example)
+
+                # --- Practice Questions ---
+                random.shuffle(motivational_messages)  # Shuffle messages at the start
+                message_counter = 0
+                answered_count = 0
+
+                for scenario in tenses[selected_tense]["scenarios"]:
+                    st.subheader(scenario["title"])
+                    user_answer = st.text_input(scenario["question"])
+                    if st.button("Submit"):
+                        st.write(motivational_messages[message_counter % len(motivational_messages)].format(name=user_name))
+                        message_counter += 1
+                        st.write("Your answer:", user_answer)
+                        answered_count += 1
+                        st.write(f"You have answered {answered_count} out of 10 questions.")
+
+                # --- Congratulatory Message and GIF ---
+                if answered_count == 10:
+                    st.balloons()
+                    st.success("Congratulations! You have completed all the questions for this tense!")
+                    show_gif("dancing_cat.gif")  # Replace with your GIF path
+                    st.write("Select another tense from the sidebar to continue practicing.")
     else:
-        st.sidebar.title("Select a Tense")
-        selected_tense = st.sidebar.selectbox("", list(tenses.keys()))
-
-        if selected_tense:
-            tense_data = tenses[selected_tense]
-            st.write(f"## {selected_tense}")
-            st.write(f"**Explanation:** {tense_data['explanation']}")
-            st.write(f"**Usage:** {tense_data['usage']}")
-            with st.expander("More Examples"):
-                for example in tense_data["examples"]:
-                    st.write(f"- {example}")
-
-            if selected_tense not in st.session_state.answered_questions:
-                st.session_state.answered_questions[selected_tense] = [None] * 10
-
-            for i, question_data in enumerate(tense_data["questions"]):
-                st.write(f"### {question_data['scenario']}")
-                st.write(question_data['question'])
-
-                user_answer = st.text_input("", key=f"{selected_tense}_{i}")
-
-                if st.button("Submit", key=f"submit_{selected_tense}_{i}"):
-                    st.write(st.session_state.motivational_messages[st.session_state.current_message_index % len(st.session_state.motivational_messages)].format(st.session_state.user_name))
-                    st.session_state.answered_questions[selected_tense][i] = user_answer
-                    st.write(f"Your answer: {user_answer}")
-                    st.session_state.current_message_index += 1
-                if st.session_state.answered_questions[selected_tense][i] is not None:
-                    st.write(f"Your previous answer: {st.session_state.answered_questions[selected_tense][i]}")
-                answered_count = sum(1 for x in st.session_state.answered_questions[selected_tense] if x is not None)
-                st.write(f"Questions answered: {answered_count}/10")
-
-            if all(x is not None for x in st.session_state.answered_questions[selected_tense]):
-                st.balloons()
-                try:
-                    st.image("dancing_cat.gif", use_container_width=True)
-                except FileNotFoundError:
-                    st.error("dancing_cat.gif not found. Please place it in the same directory as your script.")
-                st.success(f"Congratulations {st.session_state.user_name}! You've completed all questions for {selected_tense}!")
+        st.error("Please enter your name to continue.")
