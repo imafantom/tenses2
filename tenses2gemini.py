@@ -32,7 +32,6 @@ tenses = {
         "Usage": "E.g., I visited Paris last year. He went to the market.",
         "Examples": ["She walked to school.", "They played football."]
     },
-    # Add more tenses here as needed
 }
 
 def initialize_session_state():
@@ -47,6 +46,13 @@ def initialize_session_state():
         st.session_state["answers"] = []
     if "message_index" not in st.session_state:
         st.session_state["message_index"] = 0
+    if "rerun_triggered" not in st.session_state:
+        st.session_state["rerun_triggered"] = False
+
+def trigger_rerun():
+    """Trigger a safe rerun without conflicts."""
+    st.session_state["rerun_triggered"] = True
+    st.experimental_rerun()
 
 def main():
     st.set_page_config(page_title="English Grammar Practice", page_icon="📚")
@@ -57,28 +63,29 @@ def main():
     if not st.session_state["user_name"]:
         st.title("Welcome to English Grammar Practice!")
         st.markdown("## Enter your name below to get started:")
-        user_name = st.text_input("What's your name?", "")
-        if st.button("Continue"):
-            if user_name:
+        user_name = st.text_input("What's your name?", key="name_input")
+        if st.button("Continue", key="name_continue"):
+            if user_name.strip():
                 st.session_state["user_name"] = user_name
                 st.balloons()
-                st.experimental_rerun()
+                trigger_rerun()
 
     elif not st.session_state["tense"]:
         st.title(f"Hello, {st.session_state['user_name']}!")
         st.markdown("### Why are you here?")
         reason = st.radio(
             "Choose your reason:",
-            ["Because I love learning English with all my heart", "My teacher made me use this app"]
+            ["Because I love learning English with all my heart", "My teacher made me use this app"],
+            key="reason"
         )
-        if st.button("Continue"):
+        if st.button("Continue", key="reason_continue"):
             st.session_state["tense"] = "Select a tense"
-            st.experimental_rerun()
+            trigger_rerun()
 
     else:
         # Practice interface
         st.sidebar.title("Choose a Tense")
-        tense_selection = st.sidebar.radio("Tenses", list(tenses.keys()))
+        tense_selection = st.sidebar.radio("Tenses", list(tenses.keys()), key="tense_selection")
         st.session_state["tense"] = tense_selection
 
         st.title(f"{tense_selection} - Grammar Practice")
@@ -100,7 +107,7 @@ def main():
                 st.session_state["answers"].append(user_answer)
                 st.session_state["message_index"] += 1
                 st.session_state["question_number"] += 1
-                st.experimental_rerun()
+                trigger_rerun()
         else:
             st.success("Congratulations! You've completed this practice.")
             st.image("https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif", use_column_width=True)
@@ -109,4 +116,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
