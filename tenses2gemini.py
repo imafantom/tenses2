@@ -11,8 +11,8 @@ st.markdown(
     .big-font {
         font-size:48px !important;
         font-weight: bold;
-        color: #3498db; /* Example color */
-        text-shadow: 2px 2px 4px #000000; /* Example shadow */
+        color: #3498db;
+        text-shadow: 2px 2px 4px #000000;
     }
     </style>
     """,
@@ -21,25 +21,14 @@ st.markdown(
 
 # Motivational messages
 motivational_messages = [
-    "You're doing great, {}!",
-    "Keep up the amazing work, {}!",
-    "You're a grammar superstar, {}!",
-    "Every step counts, {}!",
-    "You're making progress, {}!",
-    "Don't give up, {}!",
-    "You're a language master in the making, {}!",
-    "You've got this, {}!",
-    "Learning is a journey, not a race, {}!",
-    "You're inspiring, {}!",
-    "Your effort is paying off, {}!",
-    "You're a true learner, {}!",
-    "You're shining bright, {}!",
-    "You're on the right track, {}!",
-    "You're a grammar whiz, {}!",
-    "You're doing fantastic, {}!",
-    "You're a language pro, {}!",
-    "You're a star, {}!",
-    "You're rocking it, {}!",
+    "You're doing great, {}!", "Keep up the amazing work, {}!", "You're a grammar superstar, {}!",
+    "Every step counts, {}!", "You're making progress, {}!", "Don't give up, {}!",
+    "You're a language master in the making, {}!", "You've got this, {}!",
+    "Learning is a journey, not a race, {}!", "You're inspiring, {}!",
+    "Your effort is paying off, {}!", "You're a true learner, {}!",
+    "You're shining bright, {}!", "You're on the right track, {}!",
+    "You're a grammar whiz, {}!", "You're doing fantastic, {}!",
+    "You're a language pro, {}!", "You're a star, {}!", "You're rocking it, {}!",
     "You're simply amazing, {}!"
 ]
 
@@ -67,7 +56,7 @@ tenses = {
         "usage": "Describing finished events.",
         "examples": ["I went to the store yesterday.", "She studied hard for the exam."],
         "questions": [
-        {"scenario": "Completed Actions", "question": "What did you do last weekend?"},
+            {"scenario": "Completed Actions", "question": "What did you do last weekend?"},
             {"scenario": "Specific Time", "question": "Where did you go last night?"},
             {"scenario": "Series of Actions", "question": "What did you do after you woke up?"},
             {"scenario": "Habits in the Past", "question": "What did you usually do as a child?"},
@@ -93,12 +82,15 @@ if "answered_questions" not in st.session_state:
 
 if st.session_state.user_name is None:
     st.markdown("<p class='big-font'>Welcome to Grammar Practice!</p>", unsafe_allow_html=True)
-    st.image("typing_cat.gif", use_column_width=True)
-    time.sleep(10)
+    try:
+        st.image("typing_cat.gif", use_container_width=True)  # Corrected line
+        time.sleep(10)
+    except FileNotFoundError:
+        st.error("typing_cat.gif not found. Please place it in the same directory as your script.")
     st.session_state.user_name = st.text_input("Please enter your name:")
     if st.session_state.user_name:
         st.balloons()
-        st.experimental_rerun() #Force a rerun to proceed to the next section
+        st.experimental_rerun()
 else:
     if "why_here" not in st.session_state:
         st.write(f"<p class='big-font'>{st.session_state.user_name} – Why are you here?!</p>", unsafe_allow_html=True)
@@ -140,5 +132,8 @@ else:
 
             if all(x is not None for x in st.session_state.answered_questions[selected_tense]):
                 st.balloons()
-                st.image("dancing_cat.gif", use_column_width=True)
+                try:
+                    st.image("dancing_cat.gif", use_container_width=True)
+                except FileNotFoundError:
+                    st.error("dancing_cat.gif not found. Please place it in the same directory as your script.")
                 st.success(f"Congratulations {st.session_state.user_name}! You've completed all questions for {selected_tense}!")
